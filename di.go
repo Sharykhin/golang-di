@@ -59,3 +59,26 @@ func HttpDI(w http.ResponseWriter, r *http.Request, fn interface{}) {
 
 	method.Call(params)
 }
+
+// DI is a helper method just for benchmarks
+func DI(fn interface{}) {
+	if reflect.TypeOf(fn).Kind().String() != "func" {
+		panic("third parameter must be a func")
+	}
+
+	in := reflect.ValueOf(fn).Type().NumIn()
+
+	method := reflect.ValueOf(fn)
+	params := make([]reflect.Value, in, in)
+
+	for i := 0; i < in; i++ {
+		param := method.Type().In(i)
+		if val, ok := di[param.String()]; ok {
+			params[i] = reflect.ValueOf(val)
+		} else {
+			panic("found dependency that is not in list")
+		}
+	}
+
+	//method.Call(params)
+}

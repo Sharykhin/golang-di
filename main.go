@@ -66,3 +66,9 @@ func handler(w http.ResponseWriter, r *http.Request, up UserProvider) {
 	}
 	w.Write(res)
 }
+
+// test method for bench
+func handlerT(up UserProvider) (*User, error) {
+	user, err := up.GetUser("1")
+	return user, err
+}
