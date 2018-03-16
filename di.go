@@ -28,6 +28,11 @@ func init() {
 	di["main.UserProvider"] = up
 }
 
+// Register registers dependencies
+func Register(dep map[string]interface{}) {
+	di = dep
+}
+
 // HttpDI resolves dependencies for http handler func
 func HttpDI(w http.ResponseWriter, r *http.Request, fn interface{}) {
 	if reflect.TypeOf(fn).Kind().String() != "func" {
@@ -38,18 +43,10 @@ func HttpDI(w http.ResponseWriter, r *http.Request, fn interface{}) {
 
 	method := reflect.ValueOf(fn)
 	params := make([]reflect.Value, in, in)
-
-	for i := 0; i < in; i++ {
+	params[0] = reflect.ValueOf(w)
+	params[1] = reflect.ValueOf(r)
+	for i := 2; i < in; i++ {
 		param := method.Type().In(i)
-		if param.String() == "http.ResponseWriter" {
-			params[i] = reflect.ValueOf(w)
-			continue
-		}
-		if param.String() == "*http.Request" {
-			params[i] = reflect.ValueOf(r)
-			continue
-		}
-
 		if val, ok := di[param.String()]; ok {
 			params[i] = reflect.ValueOf(val)
 		} else {
@@ -61,7 +58,7 @@ func HttpDI(w http.ResponseWriter, r *http.Request, fn interface{}) {
 }
 
 // DI is a helper method just for benchmarks
-func DI(fn interface{}) {
+func diForBench(fn interface{}) {
 	if reflect.TypeOf(fn).Kind().String() != "func" {
 		panic("third parameter must be a func")
 	}
@@ -79,6 +76,4 @@ func DI(fn interface{}) {
 			panic("found dependency that is not in list")
 		}
 	}
-
-	//method.Call(params)
 }

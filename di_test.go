@@ -1,9 +1,11 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
-func BenchmarkDI(b *testing.B) {
+func BenchmarkHttpDI(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		DI(handlerT)
+		diForBench(func(up UserProvider) {})
 	}
 }
